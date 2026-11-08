@@ -1,0 +1,185 @@
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: #16161a; color: #eee;
+  font: 16px system-ui, sans-serif;
+  padding-bottom: calc(150px + env(safe-area-inset-bottom));
+}
+input, button, .btn, textarea {
+  font: inherit; color: inherit; background: #26262c;
+  border: 1px solid #333; border-radius: 10px; padding: 12px;
+}
+input, textarea { width: 100%; }
+textarea { resize: vertical; }
+.hint { color: #888; font-size: 13px; }
+.label { color: #aaa; font-size: 13px; margin-bottom: -4px; }
+.primary { background: #1f9e8f; border: none; }
+.danger { background: #5a1f24; border: none; }
+.btn { text-align: center; }
+.row { display: flex; gap: 8px; }
+.row > * { flex: 1; }
+.row[hidden], [hidden] { display: none !important; }
+
+/* Top bar: where you are (tap any step to go there). */
+#top {
+  position: sticky; top: 0; z-index: 3; display: flex; align-items: center; gap: 6px;
+  padding: calc(6px + env(safe-area-inset-top)) 8px 6px;
+  background: #16161a; border-bottom: 1px solid #26262c;
+}
+#crumbs {
+  flex: 1; min-width: 0; display: flex; align-items: center; gap: 2px;
+  overflow-x: auto; white-space: nowrap; scrollbar-width: none;
+}
+#crumbs button {
+  flex: 0 0 auto; background: none; border: none; padding: 8px 6px; color: #9fd9d1;
+  font-size: 15px;
+}
+#crumbs button.current { color: #fff; font-weight: 600; font-size: 17px; }
+#crumbs .sep { color: #555; flex: 0 0 auto; }
+#editPlaceBtn { flex: 0 0 44px; height: 44px; padding: 0; font-size: 18px; }
+#selectBtn { flex: 0 0 auto; height: 44px; padding: 0 12px; font-size: 15px; }
+body.selecting #selectBtn { background: #1f9e8f; border-color: #1f9e8f; }
+
+/* Photos of the place you are in. */
+#photoRow { display: flex; gap: 8px; overflow-x: auto; padding: 10px 10px 0; }
+#photoRow:empty { display: none; }
+#photoRow img { height: 96px; border-radius: 8px; background: #222; flex: 0 0 auto; }
+
+.label-row {
+  padding: 12px 12px 4px; color: #888; font-size: 13px; text-transform: uppercase;
+  letter-spacing: .04em;
+}
+.row-item {
+  display: flex; align-items: center; gap: 12px; padding: 10px 12px;
+  border-bottom: 1px solid #222; min-height: 52px;
+}
+.row-item:active { background: #1f1f25; }
+.row-item .ico {
+  flex: 0 0 44px; width: 44px; height: 44px; border-radius: 8px; background: #1f1f25;
+  display: flex; align-items: center; justify-content: center; font-size: 22px;
+  overflow: hidden;
+}
+.row-item .ico img { width: 100%; height: 100%; object-fit: cover; display: block; }
+/* A thing without a photo: a small dot, so names line up with the rest. */
+.row-item .ico.none { background: none; }
+.row-item .ico.none::after { content: ''; width: 8px; height: 8px; border-radius: 50%; background: #444; }
+/* − ×3 + on counted things */
+.step { flex: 0 0 auto; display: flex; align-items: center; gap: 4px; }
+.step button {
+  width: 36px; height: 36px; padding: 0; border-radius: 50%; font-size: 20px; line-height: 1;
+}
+.step button.off { opacity: .3; }
+/* "📍 path" in search and ⚠ results: tap to open that place. */
+.row-item .where { color: #9fd9d1; padding: 4px 0; }
+.scope {
+  display: block; margin: 10px 12px 4px; padding: 8px 14px; border-radius: 20px; font-size: 14px;
+}
+.scope.on { background: #1f9e8f; border-color: #1f9e8f; }
+.row-item .info { flex: 1; min-width: 0; }
+.row-item .name { overflow-wrap: anywhere; }
+.row-item.place .name { font-weight: 600; }
+.row-item .meta { color: #999; font-size: 13px; margin-top: 2px; overflow-wrap: anywhere; }
+.row-item .go { color: #666; font-size: 22px; flex: 0 0 auto; }
+.row-item mark { background: #1f9e8f66; color: inherit; border-radius: 3px; }
+.row-item .check { flex: 0 0 24px; width: 24px; height: 24px; padding: 0; accent-color: #1f9e8f; }
+.row-item.flash { animation: flash 2.4s ease-out; }
+@keyframes flash { from { background: #1f9e8f66; } to { background: transparent; } }
+.empty { color: #888; padding: 40px 24px; text-align: center; line-height: 1.5; }
+#more { padding: 12px; color: #888; font-size: 13px; text-align: center; }
+#more:empty { display: none; }
+
+#addBtn {
+  position: fixed; right: 20px; bottom: calc(80px + env(safe-area-inset-bottom));
+  width: 64px; height: 64px; padding: 0;
+  border-radius: 50%; font-size: 34px; background: #1f9e8f; border: none; z-index: 2;
+}
+body.searching #addBtn, body.selecting #addBtn { display: none; }
+
+/* Search lives at the bottom, within thumb reach. */
+#searchBar {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 3; display: flex; gap: 8px;
+  padding: 8px 10px calc(8px + env(safe-area-inset-bottom));
+  background: #16161a; border-top: 1px solid #26262c;
+}
+#search { flex: 1; min-width: 0; }
+#search:focus { outline: none; border-color: #1f9e8f; }
+#menuBtn { width: 48px; flex: 0 0 48px; padding: 0; position: relative; }
+/* Red dot: no backup for a while. */
+#menuBtn.due::after {
+  content: ''; position: absolute; top: 6px; right: 6px; width: 10px; height: 10px;
+  border-radius: 50%; background: #ff5a64;
+}
+#backupInfo.due { color: #ffb3b8; }
+
+/* Bottom bar with one action (Undo, Reload), next to the + button. */
+#toast {
+  position: fixed; left: 10px; right: 96px; bottom: calc(86px + env(safe-area-inset-bottom)); z-index: 4;
+  display: flex; align-items: center; gap: 8px; padding: 6px 6px 6px 14px;
+  background: #2e2e36; border: 1px solid #3a3a44; border-radius: 12px; box-shadow: 0 4px 16px #0008;
+}
+#toastText { flex: 1; min-width: 0; font-size: 14px; overflow-wrap: anywhere; }
+#toastBtn { flex: 0 0 auto; padding: 8px 14px; background: none; border: none; color: #7ee2d4; font-weight: 600; }
+/* Select mode: the top bar shows the count and the actions, top right. */
+#selTools { flex: 1; min-width: 0; display: flex; align-items: center; gap: 6px; }
+#selCount { flex: 1; min-width: 0; color: #aaa; font-size: 14px; white-space: nowrap; }
+#selTools button { height: 44px; padding: 0 12px; font-size: 15px; }
+#selDelete, #selDone { flex: 0 0 44px; padding: 0; }
+body.selecting #crumbs, body.selecting #selectBtn { display: none; }
+
+dialog {
+  background: #1d1d22; color: #eee; border: 1px solid #333;
+  border-radius: 14px; width: min(94vw, 480px); padding: 14px;
+}
+dialog::backdrop { background: #000a; }
+#menu[open], #addMenu[open], #form, #addForm { display: flex; flex-direction: column; gap: 10px; }
+#picker[open] { display: flex; flex-direction: column; gap: 10px; max-height: 88vh; }
+#addText { min-height: 180px; }
+
+/* Below the minimum: light red row, and a red badge. */
+.row-item.low { background: rgba(255, 90, 100, .17); }
+.row-item.low .qty { background: #ff5a6455; color: #ffd3d6; }
+/* None left (×0): grey name, empty-looking dashed badge. Wins over the red badge. */
+.row-item.zero .name { color: #8a8a94; }
+.row-item.zero .ico.none::after { background: none; border: 1.5px solid #555; }
+.row-item.zero .qty, .row-item.zero.low .qty {
+  background: none; border: 1.5px dashed #8a8a94; color: #b8b8c0; padding: 1px 8px;
+}
+#lowBtn {
+  flex: 0 0 auto; height: 44px; padding: 0 12px; font-size: 15px;
+  background: rgba(255, 90, 100, .22); border-color: #ff5a6466; color: #ffd3d6;
+}
+body.selecting #lowBtn { display: none; }
+.qty-row { align-items: stretch; }
+.qty-row input { text-align: center; flex: 2; min-width: 0; }
+#qtyBox { display: flex; flex-direction: column; gap: 10px; }
+.qty {
+  flex: 0 0 auto; padding: 2px 9px; border-radius: 12px; background: #1f9e8f33;
+  color: #7ee2d4; font-size: 14px; font-weight: 600;
+}
+
+.inside { text-align: left; color: #9fd9d1; overflow-wrap: anywhere; }
+
+#photoStrip { display: flex; gap: 8px; overflow-x: auto; }
+#photoStrip:empty { display: none; }
+.thumb { position: relative; flex: 0 0 96px; }
+.thumb img { width: 96px; height: 96px; object-fit: cover; border-radius: 8px; display: block; }
+.thumb button {
+  position: absolute; top: 4px; right: 4px; width: 28px; height: 28px; padding: 0;
+  border-radius: 50%; background: #000b; border: none; font-size: 14px;
+}
+
+/* Place picker */
+#pickCrumbs { display: flex; flex-wrap: wrap; align-items: center; gap: 2px; font-size: 14px; }
+#pickCrumbs button { background: none; border: none; padding: 6px 4px; color: #9fd9d1; }
+#pickCrumbs .sep { color: #555; }
+#pickList { overflow-y: auto; min-height: 120px; border-top: 1px solid #26262c; }
+#pickList .row-item { padding: 6px 4px; min-height: 48px; }
+#pickList .row-item .pick { flex: 0 0 auto; padding: 8px 12px; background: #1f9e8f; border: none; }
+#pickList .new-place {
+  width: 100%; margin: 8px 0 4px; text-align: left; color: #9fd9d1; border-style: dashed;
+}
+#pickSearch { border-radius: 22px; padding: 10px 16px; }
+#pickSearch:focus { outline: none; border-color: #1f9e8f; }
+
+#viewer { padding: 0; width: auto; max-width: 100vw; background: #000; }
+#viewerPhotos { display: flex; flex-direction: column; gap: 6px; max-height: 95vh; overflow-y: auto; }
+#viewerPhotos img { max-width: 100vw; display: block; }

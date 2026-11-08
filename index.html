@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#16161a">
+  <title>Things</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icon-192.png">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header id="top">
+    <div id="crumbs"></div>
+    <button id="lowBtn" aria-label="Low items" hidden></button>
+    <button id="editPlaceBtn" aria-label="Edit this place" hidden>✎</button>
+    <button id="selectBtn" aria-label="Select">▣ Select</button>
+    <div id="selTools" hidden>
+      <span id="selCount"></span>
+      <button id="selAll">All</button>
+      <button id="selMove">Move</button>
+      <button id="selDelete" class="danger" aria-label="Delete">🗑</button>
+      <button id="selDone" class="primary" aria-label="Done">✕</button>
+    </div>
+  </header>
+  <div id="photoRow"></div>
+  <main id="list"></main>
+  <div id="more"></div>
+
+  <button id="addBtn" aria-label="Add">+</button>
+
+  <div id="toast" hidden><span id="toastText"></span><button id="toastBtn"></button></div>
+
+  <div id="searchBar">
+    <input id="search" type="search" placeholder="Search… e.g. soldering paste" autocomplete="off" enterkeyhint="search">
+    <button id="menuBtn" aria-label="Menu">⋮</button>
+  </div>
+
+  <dialog id="menu">
+    <div id="stats" class="hint"></div>
+    <div id="backupInfo" class="hint"></div>
+    <button id="exportBtn">Export backup (.zip)</button>
+    <label class="btn"><span id="importLabel">Import backup</span><input id="importFile" type="file" accept=".zip,application/zip" hidden></label>
+    <button id="closeMenu">Close</button>
+  </dialog>
+
+  <dialog id="addMenu">
+    <button id="addThingsBtn">📝 Add things here</button>
+    <button id="addPlaceBtn">📦 New place here</button>
+    <button id="closeAdd">Cancel</button>
+  </dialog>
+
+  <dialog id="addThings">
+    <form id="addForm" method="dialog">
+      <div id="addTitle" class="label"></div>
+      <textarea id="addText" rows="9" placeholder="One thing per line&#10;e.g.&#10;Soldering paste&#10;Allen key"></textarea>
+      <div class="row">
+        <button type="button" id="addCancel">Cancel</button>
+        <button type="submit" id="addSubmit" class="primary">Add</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="editor">
+    <form id="form" method="dialog">
+      <div id="editTitle" class="label"></div>
+      <input id="nameInput" placeholder="Name" autocomplete="off" required>
+      <div id="qtyBox">
+        <div class="label">How many</div>
+        <div class="row qty-row">
+          <button type="button" id="qtyMinus" aria-label="One less">−</button>
+          <input id="qtyInput" type="number" inputmode="numeric" value="1">
+          <button type="button" id="qtyPlus" aria-label="One more">+</button>
+        </div>
+        <div class="label">Minimum needed</div>
+        <div class="row qty-row">
+          <button type="button" id="minMinus" aria-label="Lower the minimum">−</button>
+          <input id="minInput" type="number" inputmode="numeric" placeholder="No minimum">
+          <button type="button" id="minPlus" aria-label="Raise the minimum">+</button>
+        </div>
+        <div class="hint">Turns red, and shows on the ⚠ page, when "How many" is below this.</div>
+      </div>
+      <div class="label">Inside</div>
+      <button type="button" id="insideBtn" class="inside"></button>
+      <div id="photoStrip"></div>
+      <div id="photoHint" class="hint">No photo</div>
+      <div class="row">
+        <label class="btn">Camera<input id="cameraInput" type="file" accept="image/*" capture="environment" hidden></label>
+        <label class="btn">Upload<input id="uploadInput" type="file" accept="image/*" hidden></label>
+        <button type="button" id="pasteBtn">Paste</button>
+      </div>
+      <button type="button" id="toPlaceBtn">📦 Turn this into a place</button>
+      <div class="row">
+        <button type="button" id="deleteBtn" class="danger">Delete</button>
+        <button type="button" id="cancelBtn">Cancel</button>
+        <button type="submit" class="primary">Save</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="picker">
+    <div id="pickTitle" class="label"></div>
+    <input id="pickSearch" type="search" placeholder="🔍 Find a place…" autocomplete="off" enterkeyhint="done">
+    <div id="pickCrumbs"></div>
+    <div id="pickList"></div>
+    <div class="row">
+      <button type="button" id="pickCancel">Cancel</button>
+      <button type="button" id="pickHere" class="primary"></button>
+    </div>
+  </dialog>
+
+  <dialog id="viewer"><div id="viewerPhotos"></div></dialog>
+
+  <script src="zip.js"></script>
+  <script src="db.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
