@@ -39,6 +39,9 @@
   <dialog id="menu">
     <div id="stats" class="hint"></div>
     <div id="backupInfo" class="hint"></div>
+    <label class="btn">Photo size <span id="iconSizeVal"></span>
+      <input id="iconSize" type="range" min="40" max="160" step="2"></label>
+    <button id="iconSizeReset">Reset photo size</button>
     <button id="exportBtn">Export backup (.zip)</button>
     <label class="btn"><span id="importLabel">Import backup</span><input id="importFile" type="file" accept=".zip,application/zip" hidden></label>
     <button id="closeMenu">Close</button>

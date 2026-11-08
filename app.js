@@ -828,6 +828,24 @@ function updateBackupInfo() {
   $('#menuBtn').classList.toggle('due', backupDue());
 }
 
+// ---------- Photo size (list thumbnails) ----------
+const ICON_KEY = 'things-iconSize';
+const ICON_DEFAULT = 72;
+function setIconSize(px) {
+  document.documentElement.style.setProperty('--ico', px + 'px');
+  $('#iconSize').value = px;
+  $('#iconSizeVal').textContent = px + ' px';
+}
+setIconSize(Number(localStorage.getItem(ICON_KEY)) || ICON_DEFAULT);
+$('#iconSize').oninput = e => {
+  setIconSize(Number(e.target.value));
+  localStorage.setItem(ICON_KEY, e.target.value);
+};
+$('#iconSizeReset').onclick = () => {
+  localStorage.removeItem(ICON_KEY);
+  setIconSize(ICON_DEFAULT);
+};
+
 $('#menuBtn').onclick = () => {
   const places = nodes.filter(n => n.kind === 'place').length;
   $('#stats').textContent = `${places} places · ${nodes.length - places} things`;
