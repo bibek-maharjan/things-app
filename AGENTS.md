@@ -47,14 +47,18 @@ only, data in IndexedDB, manual Export/Import .zip backup.
   get `.zero`: grey name, hollow dot, dashed grey badge (beats the red low badge; the red row
   background stays). Rows changed with − / + keep their buttons (`stepped`) until you open
   another place, so going 0 → 1 doesn't make them vanish. Test: `tests/zero.js`.
-- v9: list photos (`.row-item .ico`) are bigger: default 72px (was 44px). Not deployed yet.
+- v9: list photos (`.row-item .ico`) are bigger: default 72px (was 44px).
 - v10: **Photo size slider** in the ⋮ menu (40–160px, live). Sets CSS var `--ico` on `<html>`;
   saved in localStorage `things-iconSize`; "Reset photo size" goes back to 72. List view only (no gallery).
-- Status: **deployed (Nov 2026, v8).**
+- v11: keyboard fix. With the keyboard open, Android used to pan the view down to the fixed
+  search bar, hiding the results above (had to scroll up). The viewport meta now has
+  `interactive-widget=resizes-content`, so the page shrinks above the keyboard. Same fix in
+  Clothes (v10) and Purchases (v20). Not deployed yet; only the user can test it (needs a real keyboard).
+- Status: **deployed (Nov 2026, v10).**
 - Live: https://bibek-maharjan.github.io/things-app/
 - Repo: https://github.com/bibek-maharjan/things-app (public, Pages from `main`, root).
   GitHub account **bibek-maharjan** only. **Deploy only when the user asks.**
-  Bump `VERSION` in `sw.js` on every change (now `things-v10`).
+  Bump `VERSION` in `sw.js` on every change (now `things-v11`).
 - Deploy: `git commit -am "..." && git push`; Pages rebuilds in about a minute. Check with
   `gh api repos/bibek-maharjan/things-app/pages/builds/latest`.
   (Set up with `gh repo create bibek-maharjan/things-app --public --source=. --push`, then
