@@ -47,10 +47,15 @@ only, data in IndexedDB, manual Export/Import .zip backup.
   get `.zero`: grey name, hollow dot, dashed grey badge (beats the red low badge; the red row
   background stays). Rows changed with − / + keep their buttons (`stepped`) until you open
   another place, so going 0 → 1 doesn't make them vanish. Test: `tests/zero.js`.
-- Status: **v1 built and tested locally (Nov 2026). Not deployed. No git repo yet.**
-- When the user asks to deploy: new repo `bibek-maharjan/things-app` (GitHub account
-  **bibek-maharjan** only), Pages from `main`, root. **Deploy only when the user asks.**
+- Status: **deployed (Nov 2026, v8).**
+- Live: https://bibek-maharjan.github.io/things-app/
+- Repo: https://github.com/bibek-maharjan/things-app (public, Pages from `main`, root).
+  GitHub account **bibek-maharjan** only. **Deploy only when the user asks.**
   Bump `VERSION` in `sw.js` on every change (now `things-v8`).
+- Deploy: `git commit -am "..." && git push`; Pages rebuilds in about a minute. Check with
+  `gh api repos/bibek-maharjan/things-app/pages/builds/latest`.
+  (Set up with `gh repo create bibek-maharjan/things-app --public --source=. --push`, then
+  `gh api -X POST repos/bibek-maharjan/things-app/pages -f 'source[branch]=main' -f 'source[path]=/'`.)
 
 ## Why this exists
 
