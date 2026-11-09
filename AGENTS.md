@@ -57,11 +57,14 @@ only, data in IndexedDB, manual Export/Import .zip backup.
 - v12: **"📲 Install app" button** in the ⋮ menu (`#installBtn`, hidden by default). Shown only after
   the browser fires `beforeinstallprompt` (stored, `preventDefault()`); click calls `prompt()`.
   Hidden when already standalone / after `appinstalled`. Browsers without the event show nothing.
-- Status: **deployed (Nov 2026, v11); v12 committed, not pushed yet.**
+- v13: `manifest.json` has `"id": "/things-app/"` so Chrome treats Things as its own app on the
+  shared `bibek-maharjan.github.io` origin. Fixes "Installing…" that never finished (Nov 2026).
+  Clothes and Purchases not changed yet.
+- Status: **v13 (Nov 2026) pushed to GitHub Pages; test Install on the phone.**
 - Live: https://bibek-maharjan.github.io/things-app/
 - Repo: https://github.com/bibek-maharjan/things-app (public, Pages from `main`, root).
   GitHub account **bibek-maharjan** only. **Deploy only when the user asks.**
-  Bump `VERSION` in `sw.js` on every change (now `things-v12`).
+  Bump `VERSION` in `sw.js` on every change (now `things-v13`).
 - Deploy: `git commit -am "..." && git push`; Pages rebuilds in about a minute. Check with
   `gh api repos/bibek-maharjan/things-app/pages/builds/latest`.
   (Set up with `gh repo create bibek-maharjan/things-app --public --source=. --push`, then

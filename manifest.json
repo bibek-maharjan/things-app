@@ -1,4 +1,5 @@
 {
+  "id": "/things-app/",
   "name": "Things",
   "short_name": "Things",
   "start_url": "./",
