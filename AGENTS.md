@@ -53,12 +53,15 @@ only, data in IndexedDB, manual Export/Import .zip backup.
 - v11: keyboard fix. With the keyboard open, Android used to pan the view down to the fixed
   search bar, hiding the results above (had to scroll up). The viewport meta now has
   `interactive-widget=resizes-content`, so the page shrinks above the keyboard. Same fix in
-  Clothes (v10) and Purchases (v20). Not deployed yet; only the user can test it (needs a real keyboard).
-- Status: **deployed (Nov 2026, v10).**
+  Clothes (v10) and Purchases (v20). Tested by the user on the phone: works.
+- v12: **"📲 Install app" button** in the ⋮ menu (`#installBtn`, hidden by default). Shown only after
+  the browser fires `beforeinstallprompt` (stored, `preventDefault()`); click calls `prompt()`.
+  Hidden when already standalone / after `appinstalled`. Browsers without the event show nothing.
+- Status: **deployed (Nov 2026, v11); v12 committed, not pushed yet.**
 - Live: https://bibek-maharjan.github.io/things-app/
 - Repo: https://github.com/bibek-maharjan/things-app (public, Pages from `main`, root).
   GitHub account **bibek-maharjan** only. **Deploy only when the user asks.**
-  Bump `VERSION` in `sw.js` on every change (now `things-v11`).
+  Bump `VERSION` in `sw.js` on every change (now `things-v12`).
 - Deploy: `git commit -am "..." && git push`; Pages rebuilds in about a minute. Check with
   `gh api repos/bibek-maharjan/things-app/pages/builds/latest`.
   (Set up with `gh repo create bibek-maharjan/things-app --public --source=. --push`, then

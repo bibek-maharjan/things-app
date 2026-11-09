@@ -846,6 +846,30 @@ $('#iconSizeReset').onclick = () => {
   setIconSize(ICON_DEFAULT);
 };
 
+// ---------- Install button ----------
+let installEvent = null;
+const isInstalled = () =>
+  matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+const showInstall = () => { $('#installBtn').hidden = !installEvent || isInstalled(); };
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  installEvent = e;
+  showInstall();
+});
+window.addEventListener('appinstalled', () => {
+  installEvent = null;
+  showInstall();
+});
+$('#installBtn').onclick = async () => {
+  if (!installEvent) return;
+  const ev = installEvent;
+  installEvent = null;
+  showInstall();
+  ev.prompt();
+  await ev.userChoice;
+  $('#menu').close();
+};
+
 $('#menuBtn').onclick = () => {
   const places = nodes.filter(n => n.kind === 'place').length;
   $('#stats').textContent = `${places} places · ${nodes.length - places} things`;
