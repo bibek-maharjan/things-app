@@ -4,6 +4,10 @@ const reEsc = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 const compact = s => s.toLowerCase().replace(/[^\p{L}\p{N}]/gu, '');
 const natural = new Intl.Collator(undefined, { numeric: true, sensitivity: 'base' });
 const PAGE = 100;
+// crypto.randomUUID only exists on https / localhost; the fallback lets a phone test over plain http on Wi-Fi.
+const newId = () => crypto.randomUUID?.() ??
+  '10000000-1000-4000-8000-100000000000'.replace(/[018]/g, c =>
+    (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16));
 
 // A node is a place (can hold things and other places) or a thing (a line in a place).
 let nodes = [];
@@ -166,7 +170,7 @@ function counts(n) {
   return parts.join(' · ') || 'empty';
 }
 
-function rowHtml(n, { name, meta }) {
+function rowHtml(n, { name, meta, swipe }) {
   const check = selecting ? `<input type="checkbox" class="check" ${selected.has(n.id) ? 'checked' : ''} tabindex="-1">` : '';
   const ico = n.thumb ? `<div class="ico"><img src="${thumbUrl(n)}" alt=""></div>`
     : n.kind === 'place' ? '<div class="ico">📦</div>' : '<div class="ico none"></div>';
@@ -180,8 +184,12 @@ function rowHtml(n, { name, meta }) {
     ? `<div class="step"><button type="button" class="dec${count <= 0 ? ' off' : ''}" aria-label="One less">−</button>${badge}<button type="button" class="inc" aria-label="One more">+</button></div>`
     : counted ? badge : '';
   const zero = n.kind === 'thing' && count === 0;
+  // Swipe a row left to show these (main list only, not in select mode).
+  const acts = swipe && !selecting
+    ? '<div class="acts"><button type="button" class="act-edit">✎ Edit</button><button type="button" class="act-move">Move</button><button type="button" class="act-del danger">🗑 Delete</button></div>'
+    : '';
   return `<div class="row-item ${n.kind}${low ? ' low' : ''}${zero ? ' zero' : ''}" data-id="${n.id}">${check}${ico}` +
-    `<div class="info"><div class="name">${name}</div>${meta ? `<div class="meta">${meta}</div>` : ''}</div>${qty}${go}</div>`;
+    `<div class="info"><div class="name">${name}</div>${meta ? `<div class="meta">${meta}</div>` : ''}</div>${qty}${go}${acts}</div>`;
 }
 
 // "📍 Bedroom › Luga daraz", tappable: opens that place.
@@ -232,10 +240,10 @@ function renderBrowse() {
   visibleIds = list.map(n => n.id);
   let html = '';
   if (places.length) {
-    html += '<div class="label-row">Places</div>' + places.map(n => rowHtml(n, { name: esc(n.name), meta: counts(n) })).join('');
+    html += '<div class="label-row">Places</div>' + places.map(n => rowHtml(n, { name: esc(n.name), meta: counts(n), swipe: true })).join('');
   }
   if (things.length) {
-    html += `<div class="label-row">Things · ${things.length}</div>` + things.map(n => rowHtml(n, { name: esc(n.name) })).join('');
+    html += `<div class="label-row">Things · ${things.length}</div>` + things.map(n => rowHtml(n, { name: esc(n.name), swipe: true })).join('');
   }
   if (!list.length) {
     html = cur
@@ -264,7 +272,7 @@ function renderSearch(q) {
     ? `<button type="button" class="scope${searchHere ? ' on' : ''}">${searchHere ? '✓ ' : ''}Only in “${esc(byId.get(cur).name)}”</button>`
     : '';
   $('#list').innerHTML = scope + (found.length
-    ? found.slice(0, shown).map(n => rowHtml(n, { name: mark(n.name, words), meta: whereHtml(n) })).join('')
+    ? found.slice(0, shown).map(n => rowHtml(n, { name: mark(n.name, words), meta: whereHtml(n), swipe: true })).join('')
     : '<div class="empty">Nothing found.</div>');
   $('#more').textContent = found.length > shown ? `Showing ${shown} of ${found.length}…` : '';
 }
@@ -276,7 +284,7 @@ function renderLow() {
   visibleIds = found.map(n => n.id);
   renderCrumbs(`⚠ ${found.length} low`);
   $('#list').innerHTML = found.length
-    ? found.map(n => rowHtml(n, { name: esc(n.name), meta: whereHtml(n) })).join('')
+    ? found.map(n => rowHtml(n, { name: esc(n.name), meta: whereHtml(n), swipe: true })).join('')
     : '<div class="empty">Nothing is below its minimum.</div>';
   $('#more').textContent = '';
 }
@@ -367,7 +375,58 @@ async function changeQty(n, by) {
   }
 }
 
+// ---------- Swipe a row left: Edit / Move / Delete ----------
+let swipeRow = null;   // the row that is open now
+let drag = null;       // the finger on a row: { row, x, y, base, width, moving }
+let justSwiped = false;
+const slide = (row, x) => { row.style.transform = x ? `translateX(${x}px)` : ''; };
+function closeSwipe() {
+  if (swipeRow?.isConnected) slide(swipeRow, 0);
+  swipeRow = null;
+}
+
+$('#list').addEventListener('pointerdown', e => {
+  justSwiped = false;
+  const row = e.target.closest('.row-item');
+  const acts = row?.querySelector('.acts');
+  if (!acts || !e.isPrimary) { drag = null; return; }
+  const open = row === swipeRow;
+  drag = { row, x: e.clientX, y: e.clientY, base: open ? -acts.offsetWidth : 0, width: acts.offsetWidth, moving: false };
+});
+$('#list').addEventListener('pointermove', e => {
+  if (!drag) return;
+  const dx = e.clientX - drag.x;
+  if (!drag.moving) {
+    if (Math.abs(dx) < 10 || Math.abs(dx) < Math.abs(e.clientY - drag.y)) return;
+    drag.moving = true;
+    if (swipeRow && swipeRow !== drag.row) closeSwipe();
+    drag.row.classList.add('dragging');
+    drag.row.setPointerCapture(e.pointerId);
+  }
+  drag.at = Math.min(0, Math.max(-drag.width, drag.base + dx));
+  slide(drag.row, drag.at);
+});
+function endDrag(e) {
+  if (!drag) return;
+  const { row, moving, base, width, at } = drag;
+  drag = null;
+  if (!moving) return;
+  row.classList.remove('dragging');
+  justSwiped = true;
+  const moved = e.type === 'pointercancel' ? 0 : at - base;
+  // Open after a short pull left; close after a short push right.
+  const open = base ? moved < 40 : moved < -40;
+  if (open) { swipeRow = row; slide(row, -width); }
+  else { if (swipeRow === row) swipeRow = null; slide(row, 0); }
+}
+$('#list').addEventListener('pointerup', endDrag);
+$('#list').addEventListener('pointercancel', endDrag);
+
 $('#list').onclick = e => {
+  // The tap that ends a swipe is not a tap on the row.
+  if (justSwiped) { justSwiped = false; return; }
+  // With a row open, a tap anywhere else just closes it.
+  if (swipeRow?.isConnected && !e.target.closest('.acts')) { closeSwipe(); return; }
   if (e.target.closest('.scope')) {
     searchHere = !searchHere;
     shown = PAGE;
@@ -378,6 +437,14 @@ $('#list').onclick = e => {
   if (!row) return;
   const n = byId.get(row.dataset.id);
   if (!n) return;
+  const act = e.target.closest('.acts button');
+  if (act) {
+    closeSwipe();
+    if (act.classList.contains('act-edit')) openEditor(n);
+    else if (act.classList.contains('act-move')) moveNodes([n.id]);
+    else deleteNode(n);
+    return;
+  }
   if (!selecting && e.target.closest('.step')) {
     const b = e.target.closest('.dec, .inc');
     if (b) changeQty(n, b.classList.contains('inc') ? 1 : -1);
@@ -448,7 +515,7 @@ $('#addForm').onsubmit = async e => {
   if (!lines.length) return;
   const now = Date.now();
   const list = lines.map((name, i) => ({
-    node: { id: crypto.randomUUID(), kind: 'thing', name, parent: cur, created: now + i, thumb: null, photoCount: 0, edited: 0, qty: 1, min: 0 },
+    node: { id: newId(), kind: 'thing', name, parent: cur, created: now + i, thumb: null, photoCount: 0, edited: 0, qty: 1, min: 0 },
   }));
   await DB.saveMany(list);
   hl = new Set(list.map(x => x.node.id));
@@ -596,7 +663,7 @@ $('#form').onsubmit = async e => {
   const name = $('#nameInput').value.trim();
   if (!name) return;
   const node = {
-    id: editing?.id ?? crypto.randomUUID(),
+    id: editing?.id ?? newId(),
     kind: editKind,
     name,
     parent: editParent,
@@ -668,15 +735,19 @@ async function deleteWithUndo(ids) {
   });
 }
 
-$('#deleteBtn').onclick = async () => {
-  const ids = [editing.id, ...descendants(editing.id)];
+async function deleteNode(n) {
+  const ids = [n.id, ...descendants(n.id)];
   // Deleting the place you are in: go up to its parent.
   if (ids.includes(cur)) {
-    cur = editing.parent ?? null;
+    cur = n.parent ?? null;
     history.replaceState({ cur }, '');
   }
-  $('#editor').close();
   await deleteWithUndo(ids);
+}
+
+$('#deleteBtn').onclick = async () => {
+  $('#editor').close();
+  await deleteNode(editing);
 };
 
 // ---------- Place picker (for moving) ----------
@@ -738,7 +809,7 @@ async function pickNewPlace() {
   const where = pk.at ? `inside “${byId.get(pk.at).name}”` : 'at the top level';
   const name = prompt(`Name of the new place ${where}:`)?.trim();
   if (!name) return;
-  const node = { id: crypto.randomUUID(), kind: 'place', name, parent: pk.at, created: Date.now(), thumb: null, photoCount: 0, edited: 0, qty: 1, min: 0 };
+  const node = { id: newId(), kind: 'place', name, parent: pk.at, created: Date.now(), thumb: null, photoCount: 0, edited: 0, qty: 1, min: 0 };
   await DB.save(node);
   await load();
   choose(node.id);
@@ -778,12 +849,12 @@ $('#selAll').onclick = () => {
   render();
 };
 
-$('#selMove').onclick = () => {
-  const ids = [...selected].map(id => byId.get(id)).filter(Boolean);
+function moveNodes(idList) {
+  const ids = idList.map(id => byId.get(id)).filter(Boolean);
   const exclude = new Set();
   for (const n of ids) if (n.kind === 'place') { exclude.add(n.id); descendants(n.id).forEach(d => exclude.add(d)); }
   openPicker({
-    title: `Move ${ids.length} to…`,
+    title: ids.length === 1 ? `Move “${ids[0].name}” to…` : `Move ${ids.length} to…`,
     exclude, allowRoot: ids.every(n => n.kind === 'place'), start: cur,
     onPick: async dest => {
       await DB.putMany(ids.map(n => ({ ...clean(n), parent: dest })));
@@ -797,7 +868,8 @@ $('#selMove').onclick = () => {
       await load();
     },
   });
-};
+}
+$('#selMove').onclick = () => moveNodes([...selected]);
 
 $('#selDelete').onclick = async () => {
   const ids = new Set();

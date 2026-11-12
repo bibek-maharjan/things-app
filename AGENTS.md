@@ -1,7 +1,7 @@
 # Things app — project notes
 
-Read this first when starting a new session. Sister app of `/mnt/jarvis/clothes-app`
-and `/mnt/jarvis/purchases-app` (read the Purchases `AGENTS.md` for the background
+Read this first when starting a new session. Sister app of `/mnt/jarvis/personal-projects/clothes-app`
+and `/mnt/jarvis/personal-projects/purchases-app` (read the Purchases `AGENTS.md` for the background
 and the user's preferences). Same approach: no build step, offline PWA, phone
 only, data in IndexedDB, manual Export/Import .zip backup.
 
@@ -60,11 +60,16 @@ only, data in IndexedDB, manual Export/Import .zip backup.
 - v13: `manifest.json` has `"id": "/things-app/"` so Chrome treats Things as its own app on the
   shared `bibek-maharjan.github.io` origin. Fixes "Installing…" that never finished (Nov 2026).
   Clothes and Purchases not changed yet.
-- Status: **v13 (Nov 2026) pushed to GitHub Pages; test Install on the phone.**
+- v14: **Swipe a row left** (main list, search and ⚠ page; not in select mode or the picker) to
+  show **✎ Edit / Move / 🗑 Delete** (`.acts` inside the row, `rowHtml(..., { swipe: true })`).
+  Pointer events + `touch-action: pan-y`; opens after a 40px pull, closes on a push right or a tap
+  elsewhere; only one row open (`swipeRow`). Move / Delete share `moveNodes()` / `deleteNode()`
+  with select mode and the editor. ▣ Select stays for many items. Test: `tests/swipe.js`.
+- Status: **v14 (Nov 2026) local only, not deployed yet.** v13 is live.
 - Live: https://bibek-maharjan.github.io/things-app/
 - Repo: https://github.com/bibek-maharjan/things-app (public, Pages from `main`, root).
   GitHub account **bibek-maharjan** only. **Deploy only when the user asks.**
-  Bump `VERSION` in `sw.js` on every change (now `things-v13`).
+  Bump `VERSION` in `sw.js` on every change (now `things-v14`).
 - Deploy: `git commit -am "..." && git push`; Pages rebuilds in about a minute. Check with
   `gh api repos/bibek-maharjan/things-app/pages/builds/latest`.
   (Set up with `gh repo create bibek-maharjan/things-app --public --source=. --push`, then

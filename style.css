@@ -53,6 +53,19 @@ body.selecting #selectBtn { background: #1f9e8f; border-color: #1f9e8f; }
   border-bottom: 1px solid #222; min-height: 52px;
 }
 .row-item:active { background: #1f1f25; }
+/* Swipe left: the row slides over and Edit / Move / Delete come in from the right. */
+#list { overflow-x: clip; }
+#list .row-item { position: relative; touch-action: pan-y; transition: transform .2s ease-out; }
+#list .row-item.dragging { transition: none; }
+.row-item .acts {
+  position: absolute; top: 0; bottom: 0; left: 100%; display: flex;
+}
+.row-item .acts button {
+  border: none; border-radius: 0; padding: 0 14px; min-width: 76px; font-size: 14px;
+  background: #33333c; white-space: nowrap;
+}
+.row-item .acts .act-move { background: #1f6e65; }
+.row-item .acts .act-del { background: #8a2a32; }
 .row-item .ico {
   flex: 0 0 var(--ico); width: var(--ico); height: var(--ico); border-radius: 10px; background: #1f1f25;
   display: flex; align-items: center; justify-content: center; font-size: calc(var(--ico) / 2.1);
